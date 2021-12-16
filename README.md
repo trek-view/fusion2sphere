@@ -47,10 +47,20 @@ Options:
 
 #### Examples (MacOS)
 
+```
+ testframes/GB075169.JPG testframes/GF075169.JPG
+```
+
 ##### Use a GoPro Fusion 5.2k photo 
 
 ```
-$ @SYSTEM_PATH/dualfish2sphere testframes/GB075169.JPG testframes/GF075169.JPG
+$ @SYSTEM_PATH/dualfish2sphere -w 4096 /parameter-examples/gopro-fusion.txt
+```
+
+##### Use a GoPro Fusion 5.2k photo  (blend width = 5)
+
+```
+$ @SYSTEM_PATH/dualfish2sphere -w 4096 -b 5 /parameter-examples/gopro-fusion.txt
 ```
 
 ### Metadata
