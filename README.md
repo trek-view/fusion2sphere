@@ -1,4 +1,4 @@
-# DualFish2Sphere
+# Fusion2Sphere
 
 Takes two raw GoPro Fusion frames (for front and back camera) and converts them to a single equirectangular projection.
 
@@ -6,12 +6,12 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 ## Installation
 
-The dualfish2sphere command line utility should build out of the box on Linux using the simple Makefile provided. The only external dependency is the standard jpeg library (libjpeg), the lib and include directories need to be on the gcc build path. The same applies to MacOS except Xcode and command line tools need to be installed.
+The fusion2sphere command line utility should build out of the box on Linux using the simple Makefile provided. The only external dependency is the standard jpeg library (libjpeg), the lib and include directories need to be on the gcc build path. The same applies to MacOS except Xcode and command line tools need to be installed.
 
 ```
-$ git clone https://github.com/trek-view/dualfish2sphere
+$ git clone https://github.com/trek-view/fusion2sphere
 $ make -f Makefile
-$ @SYSTEM_PATH/dualfish2sphere
+$ @SYSTEM_PATH/fusion2sphere
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ $ ffmpeg -i VIDEO2.mp4 -r 1 -q:v 1 track1/img%d.jpg
 ### Script
 
 ```
-$ dualfish2sphere [options] track0filename track5filename
+$ fusion2sphere [options] track0filename track5filename
 ```
 
 Options:
@@ -54,13 +54,13 @@ Options:
 ##### Use a GoPro Fusion 5.2k photo 
 
 ```
-$ @SYSTEM_PATH/dualfish2sphere -w 4096 /parameter-examples/gopro-fusion.txt
+$ @SYSTEM_PATH/fusion2sphere -w 4096 /parameter-examples/gopro-fusion.txt
 ```
 
 ##### Use a GoPro Fusion 5.2k photo  (blend width = 5)
 
 ```
-$ @SYSTEM_PATH/dualfish2sphere -w 4096 -b 5 /parameter-examples/gopro-fusion.txt
+$ @SYSTEM_PATH/fusion2sphere -w 4096 -b 5 /parameter-examples/gopro-fusion.txt
 ```
 
 ### Metadata

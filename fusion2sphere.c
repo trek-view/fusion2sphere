@@ -1,4 +1,4 @@
-#include "dualfish2sphere.h"
+#include "fusion2sphere.h"
 
 /*
 	Convert a dual fisheye to spherical map.
@@ -243,7 +243,7 @@ int main(int argc,char **argv)
 		} // j
 		stoptime = GetTime();
 	
-		// Write a parameter file, suitable for normal dualfish2sphere usage
+		// Write a parameter file, suitable for normal fusion2sphere usage
 		opterror /= errorsum; // Normalise to "per pixel"
 		if (noptiterations > 1 && opterror < minerror) {
 	      sprintf(fname,"%s_%02d.txt",basename,nsave);
