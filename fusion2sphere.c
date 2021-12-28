@@ -21,6 +21,23 @@ FISHEYE fisheye[2];           // Input fisheye
 PARAMS params;                // General parameters
 BITMAP4 *spherical = NULL;    // Output image
 
+int readJPG(FISHEYE *fJPG)
+{
+	FILE *fimg;
+	int w,h,d;
+	if ((fimg = fopen(fJPG->fname,"rb")) == NULL) {
+		fprintf(stderr,"   Failed to open image file \"%s\"\n",fJPG->fname);
+		return(FALSE);
+	}
+	JPEG_Info(fimg, &fJPG->width, &fJPG->height,&d);
+	fJPG->image = Create_Bitmap(fJPG->width, fJPG->height);
+	if (JPEG_Read(fimg, fJPG->image,&w,&h) != 0) {
+		fprintf(stderr,"   Failed to correctly read image \"%s\"\n",fJPG->fname);
+		return(FALSE);
+	}
+	return(TRUE);
+}
+
 int main(int argc,char **argv)
 {
 	int i,j,aj,ai,n=0;
@@ -37,6 +54,7 @@ int main(int argc,char **argv)
 	double r,theta,minerror=1e32,opterror=0,errorsum = 0;
 	int nsave = 0;
 	char fname[256];
+	int nfish = 0;
 	FILE *fptr;
 
 	// Initial values for fisheye structure and general parameters
@@ -82,8 +100,28 @@ int main(int argc,char **argv)
 		} else if (strcmp(argv[i],"-f") == 0) {
 			i++;
 			strcpy(fisheye[0].fname,argv[i]);
-         i++;
-         strcpy(fisheye[1].fname,argv[i]);
+			if (IsJPEG(fisheye[0].fname)){
+				if(1 != readJPG(&fisheye[0])){
+					exit(-1);
+				}
+				nfish +=1;
+			}
+			
+			i++;
+			strcpy(fisheye[1].fname,argv[i]);
+			if (IsJPEG(fisheye[1].fname)){
+				if(1 != readJPG(&fisheye[1])){
+					exit(-1);
+				}
+				nfish +=1;
+			}
+			if(nfish == 2){
+				params.fileformat = JPG;
+			}
+			else{
+				fprintf(stderr,"Expected two fisheye images, instead found %d\n",nfish);
+				exit(-1);
+			}
 		} else if (strcmp(argv[i],"-e") == 0) {
          i++;
          noptiterations = atoi(argv[i]);
@@ -102,7 +140,6 @@ int main(int argc,char **argv)
 			params.blendmid *= (DTOR*0.5);
 		}
 	}
-
    // Read parameter file name
    if (!ReadParameters(argv[argc-1])) {
       fprintf(stderr,"Failed to read parameter file \"%s\"\n",argv[argc-1]);
@@ -552,6 +589,9 @@ int ReadParameters(char *s)
       if (aline[0] == '#') // Comment line
          continue;
       if (strstr(aline,"IMAGE:") != NULL) {
+		  nfish++;
+		  continue;
+		  /*
          if (nfish >= 2) {
             fprintf(stderr,"   Already found 2 fisheye images, cannot handle more\n");
             return(FALSE);
@@ -586,7 +626,9 @@ int ReadParameters(char *s)
          fclose(fimg);
 			strcpy(fisheye[nfish].fname,fname);
          nfish++;
-      }
+      
+	  	*/
+	  }
       if (strstr(aline,"RADIUS:") != NULL && nfish > 0) {
          sscanf(aline,"%s %d",ignore,&i);
          fisheye[nfish-1].radius = i;
@@ -979,7 +1021,3 @@ XYZ RotateZ(XYZ p,double theta)
    q.z = p.z;
    return(q);
 }
-
-
-
-
