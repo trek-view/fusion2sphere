@@ -58,11 +58,14 @@ fusion2sphere -w 4096 -f f_000001.jpg b_000001.jpg -o output.jpg parameter.txt
 ```
 Here,
 
-*-f flag needs two images one from front and second from back.
-*-o flag outputs the final image.
-*parameter.txt holds other prameters to be used.
+
+* -f flag needs two images one from front and second from back.
+* -o flag outputs the final image.
+* parameter.txt holds other prameters to be used.
+
 
 rest please follow `Options` section to read about others.
+
 
 ##### Use a GoPro Fusion 5.2k photo 
 
