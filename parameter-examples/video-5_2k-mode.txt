@@ -1,0 +1,9 @@
+# left/front
+RADIUS: 1335
+CENTER: 1345 1303
+FOV: 190
+
+# right/back
+RADIUS: 1338
+CENTER: 1337 1303
+FOV: 190
