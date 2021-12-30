@@ -1,9 +1,9 @@
-# left/front
+# left/front - 2704 x 2624
 RADIUS: 1335
 CENTER: 1345 1303
 FOV: 190
 
-# right/back
+# right/back - 2704 x 2624
 RADIUS: 1338
 CENTER: 1337 1303
 FOV: 190

@@ -1,9 +1,9 @@
-# left/front
+# left/front - 1568 x 1504
 RADIUS: 765
 CENTER: 779 742
 FOV: 190
 
-# right/back
+# right/back - 1568 x 1504
 RADIUS: 765
 CENTER: 779 742
 FOV: 190
