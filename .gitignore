@@ -5,3 +5,6 @@ _site
 
 # OS or Editor folders
 .DS_Store
+bitmaplib.o
+fusion2sphere
+fusion2sphere.o
