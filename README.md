@@ -52,19 +52,19 @@ Options:
 ##### Use a GoPro Fusion 18mp photo
 
 ```
-fusion2sphere -b 5 testframes/18mp/FR/GF075169.JPG -f testframes/18mp/BK/GB075169.JPG -o testframes/18mp/G075169.jpg parameter-examples/photo-mode.txt
+@SYSTEM_PATH/fusion2sphere -b 5 -f testframes/18mp/FR/GF075169.JPG testframes/18mp/BK/GB075169.JPG -o testframes/18mp/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
 ##### Use a GoPro Fusion 5.2k video frame
 
 ```
-fusion2sphere -b 5 testframes/5_2k/FR/GPFR7152_img1.jpg -f testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/18mp/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+@SYSTEM_PATH/fusion2sphere -b 5 -f testframes/5_2k/FR/GPFR7152_img1.jpg testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/18mp/GP7152.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
 ##### Use a GoPro Fusion 3k video frame
 
 ```
-fusion2sphere -b 5 testframes/3k/FR/GPFR0003_img1.jpg -f testframes/3k/BK/GPBK0003_img1.jpg -o testframes/18mp/GP0003.jpg parameter-examples/video-3k-mode.txt
+@SYSTEM_PATH/fusion2sphere -b 5 -f testframes/3k/FR/GPFR0003_img1.jpg testframes/3k/BK/GPBK0003_img1.jpg -o testframes/18mp/GP0003.jpg parameter-examples/video-3k-mode.txt
 ```
 
 ### Metadata
