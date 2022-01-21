@@ -25,14 +25,14 @@ If using video mode (not photos) you will first need to convert both `.mp4` vide
 You can use ffmpeg to split your `mp4` videos into frames (below at a rate of 1 FPS).
 
 ```
-$ ffmpeg -i VIDEO1.mp4 -r 1 -q:v 1 track0/img%d.jpg 
-$ ffmpeg -i VIDEO2.mp4 -r 1 -q:v 1 track1/img%d.jpg 
+$ ffmpeg -i FRVIDEO1.mp4 -r 1 -q:v 1 FR/img%d.jpg 
+$ ffmpeg -i BKVIDEO2.mp4 -r 1 -q:v 1 BK/img%d.jpg 
 ```
 
 ### Script
 
 ```
-$ fusion2sphere [options] track0filename track5filename
+$ fusion2sphere [options] track0filename track5filename parameter-file.txt
 ```
 
 Options:
@@ -43,40 +43,28 @@ Options:
 * -q n: blend power, default: linear
 * -e n: optimise over n random steps
 * -p n n n: range search aperture, center and rotations, default: 10 20 5
+* -f flag needs two images one from front and second from back.
+* -o flag outputs the final image.
 * -d: debug mode
 
 #### Examples (MacOS)
 
-```
- testframes/GB075169.JPG testframes/GF075169.JPG
-```
-
-##### Command to run using -f flag
+##### Use a GoPro Fusion 18mp photo
 
 ```
-fusion2sphere -w 4096 -f f_000001.jpg b_000001.jpg -o output.jpg parameter.txt
-```
-Here,
-
-
-* -f flag needs two images one from front and second from back.
-* -o flag outputs the final image.
-* parameter.txt holds other prameters to be used.
-
-
-rest please follow `Options` section to read about others.
-
-
-##### Use a GoPro Fusion 5.2k photo 
-
-```
-$ @SYSTEM_PATH/fusion2sphere -w 4096 /parameter-examples/gopro-fusion.txt
+fusion2sphere -b 5 testframes/18mp/FR/GF075169.JPG -f testframes/18mp/BK/GB075169.JPG -o testframes/18mp/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
-##### Use a GoPro Fusion 5.2k photo  (blend width = 5)
+##### Use a GoPro Fusion 5.2k video frame
 
 ```
-$ @SYSTEM_PATH/fusion2sphere -w 4096 -b 5 /parameter-examples/gopro-fusion.txt
+fusion2sphere -b 5 testframes/5_2k/FR/GPFR7152_img1.jpg -f testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/18mp/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+```
+
+##### Use a GoPro Fusion 3k video frame
+
+```
+fusion2sphere -b 5 testframes/3k/FR/GPFR0003_img1.jpg -f testframes/3k/BK/GPBK0003_img1.jpg -o testframes/18mp/GP0003.jpg parameter-examples/video-3k-mode.txt
 ```
 
 ### Metadata
