@@ -31,6 +31,16 @@ $ ffmpeg -i FRVIDEO1.mp4 -r 1 -q:v 1 FR/img%d.jpg
 $ ffmpeg -i BKVIDEO2.mp4 -r 1 -q:v 1 BK/img%d.jpg 
 ```
 
+### Lighting issues
+
+This script does not normalise for different lighting levels (apeture settings) on each lens.
+
+You can see an example of the light/dark effect this leads to in our examples.
+
+![](testframes/18mp/STITCHED/G075169.jpg)
+
+Therefore, you might want to proprocess frames to normalise lighting levels between front/back images.
+
 ### Script
 
 ```
