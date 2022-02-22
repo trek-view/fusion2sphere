@@ -4,7 +4,10 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 [A full description of the scripts logic can be seen here](http://paulbourke.net/dome/dualfish2sphere/).
 
-[Fusion2Sphere is implemented in our GoPro Frame Maker script which is probably better suited for your requirements](https://github.com/trek-view/gopro-frame-maker/).
+## READ BEFORE YOU BEGIN
+
+* Fusion2Sphere is implemented in our GoPro Frame Maker script. [The script adds metadata once Fusion2Sphere has finished processing (and offers a few other features) which could be better suited to your requirements](https://github.com/trek-view/gopro-frame-maker/).
+* If you want to convert the dual Fusion videos from fisheyes to a single equirectangular video (not frames), [you can follow the steps in this blog post to do so](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-raw-360).
 
 ## Installation
 
