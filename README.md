@@ -4,8 +4,9 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 ## READ BEFORE YOU BEGIN
 
-* fusion2sphere is implemented in our GoPro Frame Maker script. [The script adds metadata once fusion2sphere has finished processing (and offers a few other features) which could be better suited to your requirements](https://github.com/trek-view/gopro-frame-maker/).
+* the resulting image frames from fusion2sphere will not have any metadata. fusion2sphere is implemented in our GoPro Frame Maker script. [GoPro Frame Maker adds metadata once fusion2sphere has finished processing (and offers a few other features) which could be better suited to your requirements](https://github.com/trek-view/gopro-frame-maker/).
 * If you want to convert the dual Fusion videos from fisheyes to a single equirectangular video (not frames), [you can follow the steps in this blog post to do so](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-raw-360).
+* If you're using a GoPro Max, [check out max2sphere](https://github.com/trek-view/max2sphere).
 
 ## Installation
 
@@ -92,7 +93,7 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/
 **Single image**
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/single/FR/GPFR7152_img1.jpg testframes/5_2k/single/BK/GPBK7152_img1.jpg -o testframes/5_2k/single/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -f testframes/5_2k/single/FR/GPFR7152_img1.jpg testframes/5_2k/single/BK/GPBK7152_img1.jpg -o testframes/5_2k/single/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
 **Directory of images**
@@ -100,7 +101,7 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/
 _Note: directories image names will be sorted in ascending order for pairing._
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/directory/FR/%06d.jpg testframes/5_2k/directory/BK/%06d.jpg -o testframes/5_2k/directory/STITCHED/%06d.jpg parameter-examples/video-5_2k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -f testframes/5_2k/directory/FR/%06d.jpg testframes/5_2k/directory/BK/%06d.jpg -o testframes/5_2k/directory/STITCHED/%06d.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
 ##### Use a GoPro Fusion 3k video frame(s)
@@ -116,12 +117,6 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/si
 ```shell
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/directory/FR/%06d.jpg testframes/3k/directory/BK/%06d.jpg -o testframes/3k/directory/STITCHED/%06d.jpg parameter-examples/video-3k-mode.txt
 ```
-
-### Metadata
-
-Note, the resulting image frames will not have any metadata -- this is not covered by the script.
-
-[Our GoPro Frame Maker script can do this](https://github.com/trek-view/gopro-frame-maker/) ([the logic for which is described here](https://github.com/trek-view/gopro-frame-maker/docs/LOGIC.md))
 
 ## Support
 
