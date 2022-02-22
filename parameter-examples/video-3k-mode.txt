@@ -9,3 +9,5 @@ IMAGE:
 RADIUS: 765
 CENTER: 779 742
 FOV: 190
+
+# recommended output width = 3000

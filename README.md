@@ -43,13 +43,13 @@ Therefore, you might want to proprocess frames to normalise lighting levels betw
 
 ### Script
 
-```
+```shell
 $ fusion2sphere [options] track0filename track5filename parameter-file.txt
 ```
 
 Options:
 
-* -w n: sets the output image size, default: twice fisheye width
+* -w n: sets the output image size, default: 4096
 * -a n: sets antialiasing level, default: 2
 * -b n: longitude width for blending, default: no blending
 * -q n: blend power, default: linear
@@ -63,20 +63,20 @@ Options:
 
 ##### Use a GoPro Fusion 18mp photo
 
-```
-/Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -f testframes/18mp/FR/GF075169.JPG testframes/18mp/BK/GB075169.JPG -o testframes/18mp/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/FR/GF075169.JPG testframes/18mp/BK/GB075169.JPG -o testframes/18mp/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
 ##### Use a GoPro Fusion 5.2k video frame
 
-```
-/Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -f testframes/5_2k/FR/GPFR7152_img1.jpg testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/5_2k/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/FR/GPFR7152_img1.jpg testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/5_2k/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
 ##### Use a GoPro Fusion 3k video frame
 
-```
-/Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -f testframes/3k/FR/GPFR0003_img1.jpg testframes/3k/BK/GPBK0003_img1.jpg -o testframes/3k/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3000 -f testframes/3k/FR/GPFR0003_img1.jpg testframes/3k/BK/GPBK0003_img1.jpg -o testframes/3k/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
 ```
 
 ### Metadata
