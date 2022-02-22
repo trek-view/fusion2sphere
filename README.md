@@ -37,46 +37,83 @@ This script does not normalise for different lighting levels (apeture settings) 
 
 You can see an example of the light/dark effect this leads to in our examples.
 
-![](testframes/18mp/STITCHED/G075169.jpg)
+![](testframes/18mp/single/STITCHED/G075169.jpg)
 
 Therefore, you might want to proprocess frames to normalise lighting levels between front/back images.
 
 ### Script
 
 ```shell
-$ fusion2sphere [options] track0filename track5filename parameter-file.txt
+$ fusion2sphere [options] FRONT BACK PARAM.txt
 ```
+
+Variables:
+
+* `FRONT`: path to single front image / path to directory of front images
+* `BACK`: path to single back image / path to directory of back images
+* `PARAM.txt` correct parameter text file for image size (mode used on Fusion)
+	* 18mp = `parameter-examples/photo-mode.txt`
+	* 5.2k = `parameter-examples/video-5_2k-mode.txt`
+	* 3k = `parameter-examples/video-3k-mode.txt`
 
 Options:
 
-* -w n: sets the output image size, default: 4096
-* -a n: sets antialiasing level, default: 2
-* -b n: longitude width for blending, default: no blending
-* -q n: blend power, default: linear
-* -e n: optimise over n random steps
-* -p n n n: range search aperture, center and rotations, default: 10 20 5
-* -f flag needs two images one from front and second from back.
-* -o flag outputs the final image.
-* -d: debug mode
+* `-w` n: sets the output image size, default: 4096
+* `-a` n: sets antialiasing level, default: 2
+* `-b` n: longitude width for blending, default: no blending
+* `-q` n: blend power, default: linear
+* `-e` n: optimise over n random steps
+* `-p` n n n: range search aperture, center and rotations, default: 10 20 5
+* `-f` flag needs two images one from front and second from back.
+* `-o` flag outputs the final image.
+* `-d`: debug mode
 
 #### Examples (MacOS)
 
-##### Use a GoPro Fusion 18mp photo
+##### Use a GoPro Fusion 18mp photo(s)
+
+**Single image**
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/FR/GF075169.JPG testframes/18mp/BK/GB075169.JPG -o testframes/18mp/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/single/FR/GF075169.JPG testframes/18mp/single/BK/GB075169.JPG -o testframes/18mp/single/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
-##### Use a GoPro Fusion 5.2k video frame
+**Directory of images**
+
+_Note: directories image names will be sorted in ascending order for pairing._
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/FR/GPFR7152_img1.jpg testframes/5_2k/BK/GPBK7152_img1.jpg -o testframes/5_2k/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/directory/FR/%06d.jpg testframes/18mp/directory/BK/%06d.jpg -o testframes/18mp/directory/STITCHED/%06d parameter-examples/photo-mode.txt
 ```
 
-##### Use a GoPro Fusion 3k video frame
+##### Use a GoPro Fusion 5.2k video frame(s)
+
+**Single image**
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3000 -f testframes/3k/FR/GPFR0003_img1.jpg testframes/3k/BK/GPBK0003_img1.jpg -o testframes/3k/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/single/FR/GPFR7152_img1.jpg testframes/5_2k/single/BK/GPBK7152_img1.jpg -o testframes/5_2k/single/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+```
+
+**Directory of images**
+
+_Note: directories image names will be sorted in ascending order for pairing._
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5200 -f testframes/5_2k/directory/FR/%06d.jpg testframes/5_2k/directory/BK/%06d.jpg -o testframes/5_2k/directory/STITCHED/%06d.jpg parameter-examples/video-5_2k-mode.txt
+```
+
+##### Use a GoPro Fusion 3k video frame(s)
+
+**Single image**
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3000 -f testframes/3k/single/FR/GPFR0003_img1.jpg testframes/3k/single/BK/GPBK0003_img1.jpg -o testframes/3k/single/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
+```
+
+**Directory of images**
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3000 -f testframes/3k/directory/FR/%06d.jpg testframes/3k/directory/BK/%06d.jpg -o testframes/3k/directory/STITCHED/%06d.jpg parameter-examples/video-3k-mode.txt
 ```
 
 ### Metadata
@@ -84,14 +121,6 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3000 -f testframes/3k/FR
 Note, the resulting image frames will not have any metadata -- this is not covered by the script.
 
 [Our GoPro Frame Maker script can do this](https://github.com/trek-view/gopro-frame-maker/) ([the logic for which is described here](https://github.com/trek-view/gopro-frame-maker/docs/LOGIC.md))
-
-### Camera support
-
-This script has currently been tested with the following cameras and modes:
-
-* GoPro Fusion
-	* Unstitched 360 Videos (camera output: 2x mp4)
-	* Unstitched 360 jpgs (camera output: x jpg)
 
 ## Support
 
