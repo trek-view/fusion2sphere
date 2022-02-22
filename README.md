@@ -4,6 +4,8 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 [A full description of the scripts logic can be seen here](http://paulbourke.net/dome/dualfish2sphere/).
 
+[Fusion2Sphere is implemented in our GoPro Frame Maker script which is probably better suited for your requirements](https://github.com/trek-view/gopro-frame-maker/).
+
 ## Installation
 
 The fusion2sphere command line utility should build out of the box on Linux using the simple Makefile provided. The only external dependency is the standard jpeg library (libjpeg), the lib and include directories need to be on the gcc build path. The same applies to MacOS except Xcode and command line tools need to be installed.
@@ -71,7 +73,7 @@ Options:
 
 Note, the resulting image frames will not have any metadata -- this is not covered by the script.
 
-[These docs explain what metadata should be added](https://guides.trekview.org/explorer/developer-docs/sequences/process#unstitched-equirectangular-images-jpg).
+[Our GoPro Frame Maker script can do this](https://github.com/trek-view/gopro-frame-maker/) ([the logic for which is described here](https://github.com/trek-view/gopro-frame-maker/docs/LOGIC.md))
 
 ### Camera support
 
