@@ -24,7 +24,7 @@ BITMAP4 *spherical = NULL;    // Output image
 
 // These are known frame templates
 // The appropriate one to use will be auto detected, error is none match
-#define NTEMPLATE 2
+#define NTEMPLATE 3
 
 FRAMESPECS template[NTEMPLATE] = {{3104,3000,0,0,0,0},{2704,2624,0,0,0,0},{1568,1504,0,0,0,0}};
 int whichtemplate = -1;  
