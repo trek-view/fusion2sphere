@@ -15,11 +15,41 @@
 	Mar 2018: Added mirror flipping of the image, arise from the Insta360 camera.
              Cleaned up parameter handling
    May 2020: Added transformations that are applied to final equirectangular
+   Feb 2022: Added batch support
 */
 
 FISHEYE fisheye[2];           // Input fisheye
 PARAMS params;                // General parameters
 BITMAP4 *spherical = NULL;    // Output image
+
+// These are known frame templates
+// The appropriate one to use will be auto detected, error is none match
+#define NTEMPLATE 2
+
+FRAMESPECS template[NTEMPLATE] = {{3104,3000,0,0,0,0},{2704,2624,0,0,0,0},{1568,1504,0,0,0,0}};
+int whichtemplate = -1;  
+
+// Lookup table
+typedef struct {
+   UV uv;
+} LLTABLE;
+LLTABLE *lltable = NULL;
+
+int readJPGFast(FISHEYE *fJPG)
+{
+	FILE *fimg;
+	int w,h,d;
+	if ((fimg = fopen(fJPG->fname,"rb")) == NULL) {
+		fprintf(stderr,"   Failed to open image file \"%s\"\n",fJPG->fname);
+		return(FALSE);
+	}
+	//JPEG_Info(fimg, &fJPG->width, &fJPG->height,&d);
+	if (JPEG_Read(fimg, fJPG->image,&fJPG->width,&fJPG->height) != 0) {
+		fprintf(stderr,"   Failed to correctly read image \"%s\"\n",fJPG->fname);
+		return(FALSE);
+	}
+	return(TRUE);
+}
 
 int readJPG(FISHEYE *fJPG)
 {
@@ -38,9 +68,128 @@ int readJPG(FISHEYE *fJPG)
 	return(TRUE);
 }
 
-int main(int argc,char **argv)
+int WriteOutputImageBatch(BITMAP4 *spherical, char *basename,char *s)
 {
-	int i,j,aj,ai,n=0;
+	int i;
+	FILE *fptr;
+	char fname[256];
+
+	if (IsJPEG(s)) { // remove extension
+		for (i=strlen(s)-1;i>0;i--) {
+			if (s[i] == '.') {
+				s[i] = '\0';
+				break;
+			}
+		}
+	}
+	strcpy(fname,s);
+
+	// Add extension
+	strcat(fname,".jpg");
+	// Open file
+   if ((fptr = fopen(fname,"wb")) == NULL) {
+      fprintf(stderr,"Failed to open output file \"%s\"\n",fname);
+      return(FALSE);
+   }
+
+    JPEG_Write(fptr,spherical,params.outwidth,params.outheight,100);
+
+    fclose(fptr);
+	return(TRUE);
+}
+
+/*
+	Given a longitude and latitude calculate the rgb value from the fisheye
+	Return FALSE if the pixel is outside the fisheye image
+*/
+int FindFishPixelBatch(int n,double latitude,double longitude,UV *uv, int width, int height)
+{
+	char ind[256];
+	int k,index;
+	COLOUR c;
+	HSV hsv;
+	XYZ p,q = {0,0,0};
+	double theta,phi,r;
+	int u,v;
+	double ln = longitude;
+	UV fuv;
+
+   // Ignore pixels that will never be touched because out of blend range
+   if (n == 0) {
+      if (longitude > params.blendmid + params.blendwidth || longitude < -params.blendmid - params.blendwidth)
+			return(FALSE);
+	}
+   if (n == 1) {
+      if (longitude > -params.blendmid + params.blendwidth && longitude < params.blendmid - params.blendwidth)
+			return(FALSE); 
+   }
+
+	// Turn by 180 degrees for the second fisheye
+	if (n == 1) {
+		longitude += M_PI;
+		//printf("\nturn 180 deg %lf\n", longitude);
+	}
+
+   // p is the ray from the camera position into the scene
+   p.x = cos(latitude) * sin(longitude);
+   p.y = cos(latitude) * cos(longitude);
+   p.z = sin(latitude);
+
+   
+
+   // Apply fisheye correction transformation
+   for (k=0;k<fisheye[n].ntransform;k++) {
+	   printf("Apply fisheye correction transformation");
+      switch(fisheye[n].transform[k].axis) {
+      case XTILT:
+		   q.x =  p.x;
+   		q.y =  p.y * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
+   		q.z = -p.y * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
+         break;
+      case YROLL:
+		   q.x =  p.x * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
+		   q.y =  p.y;
+		   q.z = -p.x * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
+         break;
+      case ZPAN:
+		   q.x =  p.x * fisheye[n].transform[k].cvalue + p.y * fisheye[n].transform[k].svalue;
+		   q.y = -p.x * fisheye[n].transform[k].svalue + p.y * fisheye[n].transform[k].cvalue;
+		   q.z =  p.z;
+         break;
+      }
+		p = q;
+   }
+
+   // Calculate fisheye coordinates
+   theta = atan2(p.z,p.x);
+   phi = atan2(sqrt(p.x*p.x+p.z*p.z),p.y);
+   r = phi / fisheye[n].fov; // 0 ... 1
+
+   // Determine the u,v coordinate
+   u = fisheye[n].centerx + fisheye[n].radius * r * cos(theta);
+   //printf("u: %d, fisheye[n].width: %d", u, fisheye[n].width);
+   if (u < 0 || u >= width)
+      return(FALSE);
+
+   v = fisheye[n].centery + fisheye[n].radius * r * sin(theta);
+
+   if (v < 0 || v >= height)
+       return(FALSE);
+	index = v * width + u;
+	
+	sprintf(ind,"%d%d",index, n);
+	fuv.index = atoi(ind);
+
+	*uv = fuv;
+
+	return(TRUE);
+}
+
+int startDirectoryExtraction(int argc, char **argv, char *front, char *back, char *out, int nstart, int nstop){
+	char fname1[256], fname2[256];
+	int width=0, height=0;
+
+	int i,j,aj,ai,n=0, sdir=0;
 	int index,nantialias[2],inblendzone;
 	char basename[256],outfilename[256] = "\0";
 	BITMAP4 black = {0,0,0,255},red = {255,0,0,255};
@@ -53,12 +202,270 @@ int main(int argc,char **argv)
 	int centerx[2],centery[2];
 	double r,theta,minerror=1e32,opterror=0,errorsum = 0;
 	int nsave = 0;
-	char fname[256];
+	char fnameout[256],fname[256],tablename[256];;
+	int nfish = 0;
+	FILE *fptr;
+	int ntable = 0;
+	int itable = 0;
+
+	int face,nframe, mcount = 0, nt=0, nn = 0;
+	double dx,dy;
+	UV uv;
+
+	if ((strlen(front) > 2) && (strlen(back) > 2) && (strlen(out) > 2)) {
+		if (!CheckTemplate(front,1))     
+			front[0] = '\0';
+		if (!CheckTemplate(back,1))     
+			back[0] = '\0';
+		if (!CheckTemplate(out,1))     
+			out[0] = '\0';
+		
+		if( !((CheckTemplate(front,1) == TRUE) && (CheckTemplate(back,1)  == TRUE) && (CheckTemplate(out,1) == TRUE))){
+			exit(-1);
+		}
+	}
+	else{
+		exit(-1);
+	}
+
+   // Check the first frame to determine template and frame sizes
+	sprintf(fname1,front,nstart);
+	sprintf(fname2,back,nstart);
+
+	if ((whichtemplate = CheckFrames(fname1,fname2,&width,&height)) < 0)
+		exit(-1);
+	if (params.debug) {
+		fprintf(stderr,"%s() - frame dimensions: %d x %d\n",argv[0],width,height);
+		fprintf(stderr,"%s() - Expect frame template %d\n",argv[0],whichtemplate+1);
+	}
+
+	fisheye[0].width = width;
+	fisheye[0].height = height;
+	fisheye[1].width = width;
+	fisheye[1].height = height;
+
+   // Memory for images
+   fisheye[0].image = Create_Bitmap(width,height);
+   fisheye[1].image = Create_Bitmap(width,height);
+
+   // Create output spherical (equirectangular) image
+   spherical = Create_Bitmap(params.outwidth,params.outheight);
+
+   // Read parameter file name
+   if (!ReadParameters(argv[argc-1])) {
+      fprintf(stderr,"Failed to read parameter file \"%s\"\n",argv[argc-1]);
+      exit(-1);
+   }
+
+	// Apply defaults and precompute values
+	FisheyeDefaults(&fisheye[0]);
+	FisheyeDefaults(&fisheye[1]);
+	FlipFisheye(fisheye[0]);
+	FlipFisheye(fisheye[1]);
+
+	// Create output spherical (equirectangular) image
+	spherical = Create_Bitmap(params.outwidth,params.outheight);
+
+	// Must have blending on for optimisation
+	if (noptiterations > 1 && params.blendwidth <= 0) {
+		fprintf(stderr,"Warning: Must enable blending for optimisation, setting to 6 degrees\n");
+		params.blendwidth = 3*DTOR;
+	}
+
+	// Remember the baseline values
+	for (j=0;j<2;j++) {
+		fov[j]     = fisheye[j].fov;
+		centerx[j] = fisheye[j].centerx;
+		centery[j] = fisheye[j].centery;
+	}
+
+	if (params.debug)
+		DumpParameters();
+
+	ntable = params.outheight * params.outwidth * params.antialias * params.antialias * 2;
+	lltable = malloc(ntable*sizeof(LLTABLE));
+	sprintf(tablename,"f_%d_%d_%d_%d.data",whichtemplate,params.outwidth,params.outheight,params.antialias);
+
+	if ((fptr = fopen(tablename,"r")) != NULL) {
+		if (params.debug)
+			fprintf(stderr,"%s() - Reading lookup table\n",argv[0]);
+		if ((nt = fread(lltable,sizeof(LLTABLE),ntable,fptr)) != ntable) {
+			fprintf(stderr,"%s() - Failed to read lookup table \"%s\" (%d != %d)\n",argv[0],tablename,nt,ntable);
+		}
+		fclose(fptr);
+	}
+
+	dx = params.antialias * params.outwidth;
+	dy = params.antialias * params.outheight;
+
+	if (nt != ntable) {
+		itable = 0;
+		mcount = 0;
+
+		for (j=0;j<params.outheight;j++) {
+			latitude0 = PI * j / (double)params.outheight - PID2; // -pi/2 ... pi/2
+			for (i=0;i<params.outwidth;i++) {
+				longitude0 = TWOPI * i / (double)params.outwidth - PI; // -pi ... pi
+				for (ai=0;ai<params.antialias;ai++) {
+					longitude = longitude0 + ai * TWOPI / dx;
+					for (aj=0;aj<params.antialias;aj++) {
+						latitude = latitude0 + aj * M_PI / dy;
+						for (n=0;n<2;n++) {
+							if(FindFishPixelBatch(n,latitude,longitude,&(lltable[itable].uv), width, height)) {
+								itable++;
+							}
+						}
+					} // aj
+				} // ai
+				lltable[itable].uv.index = -1;
+				itable++;
+			} // i
+		} // j
+
+		fptr = fopen(tablename,"w");
+		fwrite(lltable,ntable,sizeof(LLTABLE),fptr);
+		fclose(fptr);
+
+	}
+
+	for (nframe=nstart;nframe<=nstop;nframe++) {
+
+		sprintf(fisheye[0].fname,front,nframe);
+		sprintf(fisheye[1].fname,back,nframe);
+
+		sprintf(fnameout,out,nframe);
+
+		if (IsJPEG(fisheye[0].fname)){
+			if(1 != readJPGFast(&fisheye[0])){
+				continue;
+			}
+		}
+		if (IsJPEG(fisheye[1].fname)){
+			if(1 != readJPGFast(&fisheye[1])){
+				continue;
+			}
+		}
+		
+		itable = 0;
+		Erase_Bitmap(spherical,params.outwidth,params.outheight,black);
+
+		for (j=0;j<params.outheight;j++) {
+			latitude0 = PI * j / (double)params.outheight - PID2; // -pi/2 ... pi/2
+			for (i=0;i<params.outwidth;i++) {
+				longitude0 = TWOPI * i / (double)params.outwidth - PI; // -pi ... pi
+
+				// Blending masks, only depend on longitude
+				if (params.blendwidth > 0) {
+					blend = (params.blendmid + params.blendwidth - fabs(longitude0)) / (2*params.blendwidth); // 0 ... 1
+					if (blend < 0) blend = 0;
+					if (blend > 1) blend = 1;
+					if (params.blendpower > 1) {
+							blend = 2 * blend - 1; // -1 to 1
+						blend = 0.5 + 0.5 * SIGN(blend) * pow(fabs(blend),1.0/params.blendpower);
+						}
+				} else { // No blend
+					blend = 0;
+					if (ABS(longitude0) <= params.blendmid) // Hard edge
+						blend = 1;
+				}
+		
+				// Are we in the blending zones
+				inblendzone = FALSE;
+				if (longitude0 <= params.blendmid + params.blendwidth && longitude0 >= params.blendmid - params.blendwidth)
+					inblendzone = TRUE;
+				if (longitude0 >= -params.blendmid - params.blendwidth && longitude0 <= -params.blendmid + params.blendwidth)
+					inblendzone = TRUE;
+
+
+				//printf("\n %lf, %lf, %lf\n", params.blendwidth, params.blendmid, params.blendpower);// 0.000000, 1.570796, 1.000000
+
+				// Initialise antialiasing accumulation variables
+				for (n=0;n<2;n++) {
+					rgbsum[n] = rgbzero;
+					nantialias[n] = 0;
+				}
+
+				for (n=0;n<100;n++) {
+					nn = 0;
+					index = lltable[itable].uv.index;
+					if(index == -1){
+						itable++;
+						break;
+					}
+					nn = index%10;
+					index = index/10;
+					//if(nn == 0){printf("\nnn: %d, index: %d, itable: %d\n", nn, index, itable);}
+					
+					rgbsum[nn].r += fisheye[nn].image[index].r;
+					rgbsum[nn].g += fisheye[nn].image[index].g;
+					rgbsum[nn].b += fisheye[nn].image[index].b;
+					nantialias[nn]++;
+
+					itable++;
+				}
+
+
+				// Normalise by antialiasing samples
+				for (n=0;n<2;n++) {
+					if (nantialias[n] > 0) {
+						rgbsum[n].r /= nantialias[n];
+						rgbsum[n].g /= nantialias[n];
+						rgbsum[n].b /= nantialias[n];
+					}
+				}
+
+				index = j * params.outwidth + i;
+				spherical[index].r = blend * rgbsum[0].r + (1 - blend) * rgbsum[1].r;
+	        	spherical[index].g = blend * rgbsum[0].g + (1 - blend) * rgbsum[1].g;
+	        	spherical[index].b = blend * rgbsum[0].b + (1 - blend) * rgbsum[1].b;
+				//printf("%d ", index);
+
+				//printf("\nindex: %d, r: %d, g: %d, b: %d\n", index, spherical[index].r, spherical[index].g, spherical[index].b);
+
+				//if(itable > 100){
+					//break;
+				//}
+
+			} // i
+			//break;
+		} // j
+
+		// Write out the spherical map 
+		if (!WriteOutputImageBatch(spherical, basename,fnameout)) {
+			fprintf(stderr,"Failed to write output image file\n");
+			exit(-1);
+		}
+
+	}
+	
+	Destroy_Bitmap(spherical);
+	Destroy_Bitmap(fisheye[0].image);
+	Destroy_Bitmap(fisheye[1].image);
+
+    return 0;
+}
+
+int main(int argc,char **argv)
+{
+	int i,j,aj,ai,n=0, sdir=0, nstart=0, nstop=0;
+	int index,nantialias[2],inblendzone;
+	char basename[256],outfilename[256] = "\0";
+	BITMAP4 black = {0,0,0,255},red = {255,0,0,255};
+	double latitude0,longitude0,latitude,longitude;
+	double weight = 1,blend = 1;
+	COLOUR rgb,rgbsum[2],rgbzero = {0,0,0};
+	double starttime,stoptime=0;
+	int nopt,noptiterations = 1; // > 1 for optimisation
+	double fov[2];
+	int centerx[2],centery[2];
+	double r,theta,minerror=1e32,opterror=0,errorsum = 0;
+	int nsave = 0;
+	char fname[256], front[256], back[256];
 	int nfish = 0;
 	FILE *fptr;
 
 	// Initial values for fisheye structure and general parameters
-	InitParams();
+   InitParams();
    InitFisheye(&fisheye[0]);
    InitFisheye(&fisheye[1]);
 
@@ -138,8 +545,27 @@ int main(int argc,char **argv)
 			i++;
          params.blendmid = atof(argv[i]);
 			params.blendmid *= (DTOR*0.5);
-		}
+        }
+      else if (strcmp(argv[i],"-x") == 0) {
+		sdir = 1;
+		i++;
+		strcpy(front,argv[i]);
+		i++;
+		strcpy(back,argv[i]);
+	  } else if (strcmp(argv[i],"-g") == 0) {
+		i++;
+		nstart = atoi(argv[i]);
+      } else if (strcmp(argv[i],"-h") == 0) {
+		i++;
+		nstop = atoi(argv[i]);
+	  }
 	}
+
+    if(sdir == 1){
+        startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
+        exit(0);
+    }
+
    // Read parameter file name
    if (!ReadParameters(argv[argc-1])) {
       fprintf(stderr,"Failed to read parameter file \"%s\"\n",argv[argc-1]);
@@ -1020,4 +1446,87 @@ XYZ RotateZ(XYZ p,double theta)
    q.y = -p.x * sin(theta) + p.y * cos(theta);
    q.z = p.z;
    return(q);
+}
+
+/************ Adding fusion2spherebatch code ************/
+
+/*
+	Check that the filename template has the correct number of %d entries
+*/
+int CheckTemplate(char *s,int nexpect)
+{
+	int i,n=0;
+
+	for (i=0;i<strlen(s);i++) {
+		if (s[i] == '%'){
+			n++;
+		}
+	}
+
+	if (n != nexpect) {
+		fprintf(stderr,"This filename template \"%s\" does not look like it contains sufficient %%d entries\n",s);
+		fprintf(stderr,"Expect %d but found %d\n",nexpect,n);
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
+
+/*
+	Check the frames
+	- do they exist
+	- are they jpeg
+	- are they the same size
+	- determine which frame template we are using
+*/
+int CheckFrames(char *fname1,char *fname2,int *width,int *height)
+{
+	int i,n=-1;
+	int w1,h1,w2,h2,depth;
+	FILE *fptr;
+
+   if (!IsJPEG(fname1) || !IsJPEG(fname2)) {
+      fprintf(stderr,"CheckFrames() - frame name does not look like a jpeg file\n");
+      return(-1);
+   }
+
+   // Frame 1
+   if ((fptr = fopen(fname1,"rb")) == NULL) {
+      fprintf(stderr,"CheckFrames() - Failed to open first frame \"%s\"\n",fname1);
+      return(-1);
+   }
+   JPEG_Info(fptr,&w1,&h1,&depth);
+   fclose(fptr);
+
+	// Frame 2
+   if ((fptr = fopen(fname2,"rb")) == NULL) {
+      fprintf(stderr,"CheckFrames() - Failed to open second frame \"%s\"\n",fname2);
+      return(-1);
+   }
+   JPEG_Info(fptr,&w2,&h2,&depth);
+   fclose(fptr);
+
+	// Are they the same size
+   if (w1 != w2 || h1 != h2) {
+      fprintf(stderr,"CheckFrames() - Frame sizes don't match, %d != %d or %d != %d\n",w1,h1,w2,h2);
+      return(-1);
+   }
+	
+	// Is it a known template?
+	for (i=0;i<NTEMPLATE;i++) {
+		//printf("\n template[i].width: %d, w1: %d, template[i].heigh: %d, h1: %d\n", template[i].width, w1, template[i].height, h1);
+		if (w1 == template[i].width && h1 == template[i].height) {
+			n = i;
+			break;
+		}
+	}
+	if (n < 0) {
+		fprintf(stderr,"CheckFrames() - No recognised frame template\n");
+		return(-1);
+	}
+
+	*width = w1;
+	*height = h1;
+
+	return(n);
 }
