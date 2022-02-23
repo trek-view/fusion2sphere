@@ -114,6 +114,8 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/si
 
 **Directory of images**
 
+_Note: directories image names will be sorted in ascending order for pairing.(g) is the start number of image and (h) is the end number of image_
+
 ```shell
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -g 1 -h 8 -x testframes/3k/directory/FR/%06d.jpg testframes/3k/directory/BK/%06d.jpg -o testframes/3k/directory/STITCHED/%06d.jpg parameter-examples/video-3k-mode.txt
 ```
