@@ -98,4 +98,5 @@ void FlipFisheye(FISHEYE);
 XYZ RotateX(XYZ,double);
 XYZ RotateY(XYZ,double);
 XYZ RotateZ(XYZ,double);
-
+int CheckTemplate(char *,int);
+int CheckFrames(char *,char *,int *,int *);
