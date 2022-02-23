@@ -82,10 +82,10 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/
 
 **Directory of images**
 
-_Note: directories image names will be sorted in ascending order for pairing._
+_Note: directories image names will be sorted in ascending order for pairing. (g) is the start number of image and (h) is the end number of image_
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/directory/FR/%06d.jpg testframes/18mp/directory/BK/%06d.jpg -o testframes/18mp/directory/STITCHED/%06d parameter-examples/photo-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -g 1 -h 8 -x testframes/18mp/directory/FR/%06d.jpg testframes/18mp/directory/BK/%06d.jpg -o testframes/18mp/directory/STITCHED/%06d parameter-examples/photo-mode.txt
 ```
 
 ##### Use a GoPro Fusion 5.2k video frame(s)
@@ -98,10 +98,10 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -f testframes/5_2k/
 
 **Directory of images**
 
-_Note: directories image names will be sorted in ascending order for pairing._
+_Note: directories image names will be sorted in ascending order for pairing.(g) is the start number of image and (h) is the end number of image_
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -f testframes/5_2k/directory/FR/%06d.jpg testframes/5_2k/directory/BK/%06d.jpg -o testframes/5_2k/directory/STITCHED/%06d.jpg parameter-examples/video-5_2k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -g 1 -h 8 -x testframes/5_2k/directory/FR/%06d.jpg testframes/5_2k/directory/BK/%06d.jpg -o testframes/5_2k/directory/STITCHED/%06d.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
 ##### Use a GoPro Fusion 3k video frame(s)
@@ -115,7 +115,7 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/si
 **Directory of images**
 
 ```shell
-$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/directory/FR/%06d.jpg testframes/3k/directory/BK/%06d.jpg -o testframes/3k/directory/STITCHED/%06d.jpg parameter-examples/video-3k-mode.txt
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -g 1 -h 8 -x testframes/3k/directory/FR/%06d.jpg testframes/3k/directory/BK/%06d.jpg -o testframes/3k/directory/STITCHED/%06d.jpg parameter-examples/video-3k-mode.txt
 ```
 
 ## Support
