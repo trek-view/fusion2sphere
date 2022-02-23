@@ -30,6 +30,10 @@ typedef struct {
 } XYZ;
 
 typedef struct {
+	int index;
+} UV;
+
+typedef struct {
 	char fname[256];
    BITMAP4 *image;
    int width,height;
@@ -59,6 +63,15 @@ typedef struct {
 	int deltacenter;           // Variation of fisheye center coordinates
 	double deltatheta;         // Variation of rotations
 } PARAMS;
+
+
+typedef struct {
+   int width,height;
+   int sidewidth;
+   int centerwidth;
+   int blendwidth;
+	int equiwidth;
+} FRAMESPECS;
 
 #define TRUE  1
 #define FALSE 0
