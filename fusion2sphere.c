@@ -38,7 +38,6 @@ LLTABLE *lltable = NULL;
 int readJPGFast(FISHEYE *fJPG)
 {
 	FILE *fimg;
-	int w,h,d;
 	if ((fimg = fopen(fJPG->fname,"rb")) == NULL) {
 		fprintf(stderr,"   Failed to open image file \"%s\"\n",fJPG->fname);
 		return(FALSE);
@@ -106,12 +105,9 @@ int FindFishPixelBatch(int n,double latitude,double longitude,UV *uv, int width,
 {
 	char ind[256];
 	int k,index;
-	COLOUR c;
-	HSV hsv;
 	XYZ p,q = {0,0,0};
 	double theta,phi,r;
 	int u,v;
-	double ln = longitude;
 	UV fuv;
 
    // Ignore pixels that will never be touched because out of blend range
@@ -189,28 +185,27 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 	char fname1[256], fname2[256];
 	int width=0, height=0;
 
-	int i,j,aj,ai,n=0, sdir=0;
-	int index,nantialias[2],inblendzone;
-	char basename[256],outfilename[256] = "\0";
-	BITMAP4 black = {0,0,0,255},red = {255,0,0,255};
-	double latitude0,longitude0,latitude,longitude;
-	double weight = 1,blend = 1;
-	COLOUR rgb,rgbsum[2],rgbzero = {0,0,0};
-	double starttime,stoptime=0;
-	int nopt,noptiterations = 1; // > 1 for optimisation
-	double fov[2];
-	int centerx[2],centery[2];
-	double r,theta,minerror=1e32,opterror=0,errorsum = 0;
-	int nsave = 0;
-	char fnameout[256],fname[256],tablename[256];;
-	int nfish = 0;
+	int i,j,aj,ai,n=0;
+	int index,nantialias[2];
+	int inblendzone = FALSE;
+	char basename[256];
+	BITMAP4 black = {0,0,0,255};
+	double latitude0,longitude0,latitude,longitude; 
+	double blend = 1;
+	COLOUR rgbsum[2],rgbzero = {0,0,0};
+	int noptiterations = 1; // > 1 for optimisation
+	char fnameout[256],tablename[256];
 	FILE *fptr;
 	int ntable = 0;
 	int itable = 0;
 
-	int face,nframe, mcount = 0, nt=0, nn = 0;
+	int nframe, nt=0, nn = 0;
 	double dx,dy;
-	UV uv;
+
+	if(inblendzone != FALSE){
+		inblendzone = FALSE;
+	}
+	
 
 	if ((strlen(front) > 2) && (strlen(back) > 2) && (strlen(out) > 2)) {
 		if (!CheckTemplate(front,1))     
@@ -272,12 +267,7 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 		params.blendwidth = 3*DTOR;
 	}
 
-	// Remember the baseline values
-	for (j=0;j<2;j++) {
-		fov[j]     = fisheye[j].fov;
-		centerx[j] = fisheye[j].centerx;
-		centery[j] = fisheye[j].centery;
-	}
+
 
 	if (params.debug)
 		DumpParameters();
@@ -300,7 +290,6 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 
 	if (nt != ntable) {
 		itable = 0;
-		mcount = 0;
 
 		for (j=0;j<params.outheight;j++) {
 			latitude0 = PI * j / (double)params.outheight - PID2; // -pi/2 ... pi/2
@@ -454,7 +443,7 @@ int main(int argc,char **argv)
 	double latitude0,longitude0,latitude,longitude;
 	double weight = 1,blend = 1;
 	COLOUR rgb,rgbsum[2],rgbzero = {0,0,0};
-	double starttime,stoptime=0;
+	double starttime=0,stoptime=0;
 	int nopt,noptiterations = 1; // > 1 for optimisation
 	double fov[2];
 	int centerx[2],centery[2];
@@ -991,7 +980,7 @@ void DumpParameters(void)
          fprintf(stderr,"%.1lf\n",fisheye[i].transform[j].value*RTOD);
       }
    }
-}
+} 
 
 /*
 	Read the parameter file, loading up the FISHEYE structure
@@ -1002,10 +991,10 @@ void DumpParameters(void)
 int ReadParameters(char *s)
 {
 	int nfish = 0;
-	int i,j,w,h,d,flip;
-	char ignore[256],aline[256],fname[256];
+	int i,j,flip;
+	char ignore[256],aline[256];
 	double angle;
-	FILE *fptr,*fimg;
+	FILE *fptr;
 
    if ((fptr = fopen(s,"r")) == NULL) {
       fprintf(stderr,"   Failed to open parameter file \"%s\"\n",s);
@@ -1471,6 +1460,8 @@ int CheckTemplate(char *s,int nexpect)
 
 	return(TRUE);
 }
+
+
 
 /*
 	Check the frames
