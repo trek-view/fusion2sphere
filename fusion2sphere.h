@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <sys/time.h>
 #include "bitmaplib.h"
 #include "jpeglib.h"
@@ -56,6 +57,9 @@ typedef struct {
 	double ifcn[6];            // Coefficients of 5th order polynomial brightness correction
                               // 1 + a[1]x + a[2]x^2 + a[3]x^3 + a[4]x^4 + a[5]x^5
                               // Should map from 0 to 1 to 0 to generally 1+delta
+
+	int makeremap;             // Create remap filters for ffmpeg (just fish2sphere mapping)
+
 	int fileformat;            // Input image format
 
 	// For experimental optimisations
@@ -84,7 +88,7 @@ typedef struct {
 void GiveUsage(char *);
 void InitFisheye(FISHEYE *);
 void FisheyeDefaults(FISHEYE *);
-int FindFishPixel(int,double,double,COLOUR *);
+int FindFishPixel(int,double,double,int *,int *,COLOUR *);
 double GetTime(void);
 void DumpParameters(void);
 int ReadParameters(char *);
