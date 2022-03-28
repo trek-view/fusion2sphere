@@ -69,6 +69,7 @@ Options:
 * `-f` flag needs two images one from front and second from back.
 * `-o` flag outputs the final image.
 * `-d`: debug mode
+* `-r`: create remap filters for ffmpeg
 
 #### Examples (MacOS)
 
