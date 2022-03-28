@@ -16,6 +16,7 @@
              Cleaned up parameter handling
    May 2020: Added transformations that are applied to final equirectangular
    Feb 2022: Added batch support
+   Feb 2022: Add remap filters for ffmpeg, just the fish2sphere part. See documentation for blending
 */
 
 FISHEYE fisheye[2];           // Input fisheye
@@ -436,7 +437,7 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 
 int main(int argc,char **argv)
 {
-	int i,j,aj,ai,n=0, sdir=0, nstart=0, nstop=0;
+	int i,j,aj,ai,n=0, sdir=0, nstart=0, nstop=0,ix,iy;
 	int index,nantialias[2],inblendzone;
 	char basename[256],outfilename[256] = "\0";
 	BITMAP4 black = {0,0,0,255},red = {255,0,0,255};
@@ -518,7 +519,9 @@ int main(int argc,char **argv)
 				fprintf(stderr,"Expected two fisheye images, instead found %d\n",nfish);
 				exit(-1);
 			}
-		} else if (strcmp(argv[i],"-e") == 0) {
+		} else if (strcmp(argv[i],"-r") == 0) {
+			params.makeremap = TRUE;
+      	} else if (strcmp(argv[i],"-e") == 0) {
          i++;
          noptiterations = atoi(argv[i]);
 		} else if (strcmp(argv[i],"-p") == 0) {
@@ -549,6 +552,11 @@ int main(int argc,char **argv)
 		nstop = atoi(argv[i]);
 	  }
 	}
+
+	// Optionally create ffmpeg remap filter PGM files
+	if (params.makeremap)
+		MakeRemap();
+
 
     if(sdir == 1){
         startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
@@ -656,7 +664,7 @@ int main(int argc,char **argv)
 	      		for (aj=0;aj<params.antialias;aj++) {
 						latitude = latitude0 + aj * M_PI / (params.antialias*params.outheight);
 						for (n=0;n<2;n++) {
-							if (FindFishPixel(n,latitude,longitude,&rgb)) {
+							if (FindFishPixel(n,latitude,longitude,&ix,&iy,&rgb)) {
 								rgbsum[n].r += rgb.r;
 		               	rgbsum[n].g += rgb.g;
 		               	rgbsum[n].b += rgb.b;
@@ -791,6 +799,7 @@ void GiveUsage(char *s)
 	fprintf(stderr,"   -o s      output file name, default: derived from input name\n");
 	fprintf(stderr,"   -m n      specify blend mid angle, default: %g\n",RTOD*2*params.blendmid);
 	fprintf(stderr,"   -d        debug mode, default: off\n");
+	fprintf(stderr,"   -r        create remap filters for ffmpeg, default: off\n");
    exit(-1);
 }
 
@@ -844,33 +853,36 @@ void FisheyeDefaults(FISHEYE *f)
    }
 }
 
-/*
-	Given a longitude and latitude calculate the rgb value from the fisheye
-	Return FALSE if the pixel is outside the fisheye image
-*/
-int FindFishPixel(int n,double latitude,double longitude,COLOUR *rgb)
-{
-	int k,index;
-	COLOUR c;
-	HSV hsv;
-	XYZ p,q = {0,0,0};
-	double theta,phi,r;
-	int u,v;
 
+/*
+   Given a longitude and latitude calculate the rgb value from the fisheye
+   Return FALSE if the pixel is outside the fisheye image
+*/
+int FindFishPixel(int n,double latitude,double longitude,int *u,int *v,COLOUR *rgb)
+{
+   int k,index;
+   COLOUR c = {0,0,0};
+   XYZ p,q = {0,0,0};
+   double theta,phi,r;
+
+	*u = -1;
+	*v = -1;
+	*rgb = c;
+	
    // Ignore pixels that will never be touched because out of blend range
    if (n == 0) {
       if (longitude > params.blendmid + params.blendwidth || longitude < -params.blendmid - params.blendwidth)
-			return(FALSE);
-	}
+         return(FALSE);
+   }
    if (n == 1) {
       if (longitude > -params.blendmid + params.blendwidth && longitude < params.blendmid - params.blendwidth)
-			return(FALSE); 
+         return(FALSE); 
    }
 
-	// Turn by 180 degrees for the second fisheye
-	if (n == 1) {
-		longitude += M_PI;
-	}
+   // Turn by 180 degrees for the second fisheye
+   if (n == 1) {
+      longitude += M_PI;
+   }
 
    // p is the ray from the camera position into the scene
    p.x = cos(latitude) * sin(longitude);
@@ -881,22 +893,22 @@ int FindFishPixel(int n,double latitude,double longitude,COLOUR *rgb)
    for (k=0;k<fisheye[n].ntransform;k++) {
       switch(fisheye[n].transform[k].axis) {
       case XTILT:
-		   q.x =  p.x;
-   		q.y =  p.y * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
-   		q.z = -p.y * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
+         q.x =  p.x;
+         q.y =  p.y * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
+         q.z = -p.y * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
          break;
       case YROLL:
-		   q.x =  p.x * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
-		   q.y =  p.y;
-		   q.z = -p.x * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
+         q.x =  p.x * fisheye[n].transform[k].cvalue + p.z * fisheye[n].transform[k].svalue;
+         q.y =  p.y;
+         q.z = -p.x * fisheye[n].transform[k].svalue + p.z * fisheye[n].transform[k].cvalue;
          break;
       case ZPAN:
-		   q.x =  p.x * fisheye[n].transform[k].cvalue + p.y * fisheye[n].transform[k].svalue;
-		   q.y = -p.x * fisheye[n].transform[k].svalue + p.y * fisheye[n].transform[k].cvalue;
-		   q.z =  p.z;
+         q.x =  p.x * fisheye[n].transform[k].cvalue + p.y * fisheye[n].transform[k].svalue;
+         q.y = -p.x * fisheye[n].transform[k].svalue + p.y * fisheye[n].transform[k].cvalue;
+         q.z =  p.z;
          break;
       }
-		p = q;
+      p = q;
    }
 
    // Calculate fisheye coordinates
@@ -905,39 +917,20 @@ int FindFishPixel(int n,double latitude,double longitude,COLOUR *rgb)
    r = phi / fisheye[n].fov; // 0 ... 1
 
    // Determine the u,v coordinate
-   u = fisheye[n].centerx + fisheye[n].radius * r * cos(theta);
-   if (u < 0 || u >= fisheye[n].width)
+   *u = fisheye[n].centerx + fisheye[n].radius * r * cos(theta);
+   if (*u < 0 || *u >= fisheye[n].width)
       return(FALSE);
-   v = fisheye[n].centery + fisheye[n].radius * r * sin(theta);
-   if (v < 0 || v >= fisheye[n].height)
+   *v = fisheye[n].centery + fisheye[n].radius * r * sin(theta);
+   if (*v < 0 || *v >= fisheye[n].height)
        return(FALSE);
-	index = v * fisheye[n].width + u;
-	c.r = fisheye[n].image[index].r;
-   c.g = fisheye[n].image[index].g;
-   c.b = fisheye[n].image[index].b;
 
-	// Intensity correction
-	if (params.icorrection) {
-		c.r /= 255.0;
-      c.g /= 255.0;
-      c.b /= 255.0;
-		hsv = RGB2HSV(c);
-		hsv.v *= (params.ifcn[0] + r*(params.ifcn[1] + r*(params.ifcn[2] + r*(params.ifcn[3] + r*(params.ifcn[4] + r*params.ifcn[5])))));
-		if (hsv.v < 0)
-			hsv.v = 0;
-      if (hsv.v > 1)
-         hsv.v = 1;
-		c = HSV2RGB(hsv);
-      c.r *= 255.0;
-      c.g *= 255.0;
-      c.b *= 255.0;
-	}
+	// Extract rgb colour
+   index = (*v) * fisheye[n].width + (*u);
+   rgb->r = fisheye[n].image[index].r;
+   rgb->g = fisheye[n].image[index].g;
+   rgb->b = fisheye[n].image[index].b;
 
-	rgb->r = c.r;
-   rgb->g = c.g;
-   rgb->b = c.b;
-
-	return(TRUE);
+   return(TRUE);
 }
 
 /*
@@ -1435,6 +1428,58 @@ XYZ RotateZ(XYZ p,double theta)
    q.y = -p.x * sin(theta) + p.y * cos(theta);
    q.z = p.z;
    return(q);
+}
+
+
+
+/*
+	Create remap filters for ffmpeg
+	This does not do blending, just creates the rema filters for each half
+	of the fisheye2spherical process
+	See documentation for how to use ffmpeg to blend these together
+*/
+void MakeRemap(void)
+{
+   int i,j,ix,iy,u,v,n;
+   double longitude,latitude;
+   char fname[256];
+   FILE *fptrx = NULL,*fptry = NULL;
+	COLOUR rgb;
+
+	for (n=0;n<2;n++) {
+
+	   sprintf(fname,"fusion2sphere%d_x.pgm",n);
+	   fptrx = fopen(fname,"w");
+   	fprintf(fptrx,"P2\n%d %d\n65535\n",params.outwidth,params.outheight);
+
+   	sprintf(fname,"fusion2sphere%d_y.pgm",n);
+   	fptry = fopen(fname,"w");
+   	fprintf(fptry,"P2\n%d %d\n65535\n",params.outwidth,params.outheight);
+
+   	for (j=params.outheight-1;j>=0;j--) {
+   	   for (i=0;i<params.outwidth;i++) {
+   	      ix = -1;
+   	      iy = -1;
+	
+	         // Calculate longitude and latitude
+	         longitude = TWOPI * i / (double)params.outwidth - PI; // -pi ... pi
+	         latitude = PI * j / (double)params.outheight - PID2; // -pi/2 ... pi/2
+	
+	         // Find the corresponding pixel in the fisheye image
+	         if (FindFishPixel(n,latitude,longitude,&u,&v,&rgb)) {
+	            ix = u;
+	            iy = fisheye[n].height-1-v;
+	         }
+	         fprintf(fptrx,"%d ",ix);
+	         fprintf(fptry,"%d ",iy);
+	      }
+	      fprintf(fptrx,"\n");
+	      fprintf(fptry,"\n");
+	   }
+	   fclose(fptrx);
+	   fclose(fptry);
+
+	} // n
 }
 
 /************ Adding fusion2spherebatch code ************/
