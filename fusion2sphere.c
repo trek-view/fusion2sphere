@@ -555,9 +555,9 @@ int main(int argc,char **argv)
 
     if(sdir == 1){
         startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
-	// Optionally create ffmpeg remap filter PGM files
-	if (params.makeremap)
-		MakeRemap();
+		// Optionally create ffmpeg remap filter PGM files
+		if (params.makeremap)
+			MakeRemap();
         exit(0);
     }
 
