@@ -10,4 +10,5 @@ RADIUS: 765
 CENTER: 779 742
 FOV: 190
 
-# recommended output width = 3072
+# recommended output width = 3072 (gives final dimensions of 3072 × 1536)
+# 0.25 pt = 768, 0.75 pt = 2304
