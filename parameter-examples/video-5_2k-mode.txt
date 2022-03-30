@@ -11,3 +11,4 @@ CENTER: 1337 1303
 FOV: 190
 
 # recommended output width = 5228 (gives final dimensions of 5228 × 2614)
+# 0.25 pt = 1307, 0.75 pt = 3921
