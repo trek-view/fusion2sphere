@@ -427,7 +427,9 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 		}
 
 	}
-	
+		// Optionally create ffmpeg remap filter PGM files
+		if (params.makeremap)
+			MakeRemap();
 	Destroy_Bitmap(spherical);
 	Destroy_Bitmap(fisheye[0].image);
 	Destroy_Bitmap(fisheye[1].image);
@@ -555,9 +557,6 @@ int main(int argc,char **argv)
 
     if(sdir == 1){
         startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
-		// Optionally create ffmpeg remap filter PGM files
-		if (params.makeremap)
-			MakeRemap();
         exit(0);
     }
 
