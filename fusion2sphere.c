@@ -553,13 +553,11 @@ int main(int argc,char **argv)
 	  }
 	}
 
+    if(sdir == 1){
+        startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
 	// Optionally create ffmpeg remap filter PGM files
 	if (params.makeremap)
 		MakeRemap();
-
-
-    if(sdir == 1){
-        startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
         exit(0);
     }
 
@@ -774,6 +772,10 @@ int main(int argc,char **argv)
 		}
 	}
 
+	// Optionally create ffmpeg remap filter PGM files
+	if (params.makeremap)
+		MakeRemap();
+	
 	// Write out the spherical map 
 	if (!WriteOutputImage(basename,outfilename)) {
 		fprintf(stderr,"Failed to write output image file\n");
