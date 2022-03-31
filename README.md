@@ -81,6 +81,12 @@ Options:
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/single/FR/GF075169.JPG testframes/18mp/single/BK/GB075169.JPG -o testframes/18mp/single/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
+**Single image (and generate `.pgm` files with `-r`)**
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -r -b 5 -w 5760 -f testframes/18mp/single/FR/GF075169.JPG testframes/18mp/single/BK/GB075169.JPG -o testframes/18mp/single/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
+```
+
 **Directory of images**
 
 _Note: directories image names will be sorted in ascending order for pairing. (g) is the start number of image and (h) is the end number of image_

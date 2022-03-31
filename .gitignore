@@ -9,3 +9,4 @@ bitmaplib.o
 fusion2sphere
 fusion2sphere.o
 *.data
+*.mp4
