@@ -69,7 +69,7 @@ Options:
 * `-f` flag needs two images one from front and second from back.
 * `-o` flag outputs the final image.
 * `-d`: debug mode
-* `-r`: create remap filters for ffmpeg
+* `-r`: create remap filters for ffmpeg ([see this post for more on how these are used](https://www.trekview.org/blog/using-ffmpeg-process-gopro-fusion-max-360))
 
 #### Examples (MacOS)
 
@@ -81,7 +81,7 @@ Options:
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -f testframes/18mp/single/FR/GF075169.JPG testframes/18mp/single/BK/GB075169.JPG -o testframes/18mp/single/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
 ```
 
-**Single image (and generate `.pgm` files with `-r`)**
+**Generate `.pgm` files for ffmpeg**
 
 ```shell
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -r -b 5 -w 5760 -f testframes/18mp/single/FR/GF075169.JPG testframes/18mp/single/BK/GB075169.JPG -o testframes/18mp/single/STITCHED/G075169.jpg parameter-examples/photo-mode.txt
@@ -103,6 +103,12 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5760 -g 075169 -h 075171
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -f testframes/5_2k/single/FR/GPFR7152_img1.jpg testframes/5_2k/single/BK/GPBK7152_img1.jpg -o testframes/5_2k/single/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
 ```
 
+**Generate `.pgm` files for ffmpeg**
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -r -b 5 -w 5228 -f testframes/5_2k/single/FR/GPFR7152_img1.jpg testframes/5_2k/single/BK/GPBK7152_img1.jpg -o testframes/5_2k/single/STITCHED/GP7152.jpg parameter-examples/video-5_2k-mode.txt
+```
+
 **Directory of images**
 
 _Note: directories image names will be sorted in ascending order for pairing.(g) is the start number of image and (h) is the end number of image_
@@ -117,6 +123,12 @@ $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 5228 -g 1 -h 5 -x testfr
 
 ```shell
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -f testframes/3k/single/FR/GPFR0003_img1.jpg testframes/3k/single/BK/GPBK0003_img1.jpg -o testframes/3k/single/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
+```
+
+**Generate `.pgm` files for ffmpeg**
+
+```shell
+$ /Users/dgreenwood/fusion2sphere/fusion2sphere -r -b 5 -w 3072 -f testframes/3k/single/FR/GPFR0003_img1.jpg testframes/3k/single/BK/GPBK0003_img1.jpg -o testframes/3k/single/STITCHED/GP0003.jpg parameter-examples/video-3k-mode.txt
 ```
 
 **Directory of images**
