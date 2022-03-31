@@ -427,7 +427,9 @@ int startDirectoryExtraction(int argc, char **argv, char *front, char *back, cha
 		}
 
 	}
-	
+		// Optionally create ffmpeg remap filter PGM files
+		if (params.makeremap)
+			MakeRemap();
 	Destroy_Bitmap(spherical);
 	Destroy_Bitmap(fisheye[0].image);
 	Destroy_Bitmap(fisheye[1].image);
@@ -552,11 +554,6 @@ int main(int argc,char **argv)
 		nstop = atoi(argv[i]);
 	  }
 	}
-
-	// Optionally create ffmpeg remap filter PGM files
-	if (params.makeremap)
-		MakeRemap();
-
 
     if(sdir == 1){
         startDirectoryExtraction(argc, argv, front, back, outfilename, nstart, nstop);
@@ -774,6 +771,10 @@ int main(int argc,char **argv)
 		}
 	}
 
+	// Optionally create ffmpeg remap filter PGM files
+	if (params.makeremap)
+		MakeRemap();
+	
 	// Write out the spherical map 
 	if (!WriteOutputImage(basename,outfilename)) {
 		fprintf(stderr,"Failed to write output image file\n");
