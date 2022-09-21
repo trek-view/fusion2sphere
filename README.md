@@ -12,9 +12,26 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 The fusion2sphere command line utility should build out of the box on Linux using the simple Makefile provided. The only external dependency is the standard jpeg library (libjpeg), the lib and include directories need to be on the gcc build path. The same applies to MacOS except Xcode and command line tools need to be installed.
 
-```
+```shell
 $ git clone https://github.com/trek-view/fusion2sphere
 $ make -f Makefile
+$ @SYSTEM_PATH/fusion2sphere
+```
+
+Where `@SYSTEM_PATH` is full route to repo and fusion2sphere command, e.g.
+
+```shell
+/Users/dgreenwood/Documents/repos/trek-view/fusion2sphere/fusion2sphere
+```
+
+### Note for Mac M1 Chip users
+
+I ran into a few issues with my new Mac with an M1 chop that required a slightly different Makefile (because homebrew directory issues finding installed files, specifically `fatal error: 'jpeglib.h' file not found`).
+
+```shell
+$ git clone https://github.com/trek-view/fusion2sphere
+$ cd fusion2sphere
+$ make -f Makefile-MacM1
 $ @SYSTEM_PATH/fusion2sphere
 ```
 
