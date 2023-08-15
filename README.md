@@ -5,7 +5,7 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 ## READ BEFORE YOU BEGIN
 
 * the resulting image frames from fusion2sphere will not have any metadata. fusion2sphere is implemented in our GoPro Frame Maker script. [GoPro Frame Maker adds metadata once fusion2sphere has finished processing (and offers a few other features) which could be better suited to your requirements](https://github.com/trek-view/gopro-frame-maker/).
-* If you want to convert the dual Fusion videos from fisheyes to a single equirectangular video (not frames), [you can follow the steps in this blog post to do so](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-raw-360).
+* If you want to convert the dual Fusion videos from fisheyes to a single equirectangular video (not frames), [you can follow the steps in this blog post to do so](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-fusion-fisheye/). The `.pgm` files described later in this post are required for this.
 * If you're using a GoPro Max, [check out max2sphere](https://github.com/trek-view/max2sphere).
 
 ## Installation
@@ -156,8 +156,6 @@ _Note: directories image names will be sorted in ascending order for pairing.(g)
 $ /Users/dgreenwood/fusion2sphere/fusion2sphere -b 5 -w 3072 -g 1 -h 5 -x testframes/3k/directory/FR/GPFR0003_img%01d.jpg testframes/3k/directory/BK/GPBK0003_img%01d.jpg -o testframes/3k/directory/STITCHED/GPFR0003_img%01d.jpg parameter-examples/video-3k-mode.txt
 ```
 
-## Support
+## License
 
-Join our Discord community and get in direct contact with the Trek View team, and the wider Trek View community.
-
-[Join the Trek View Discord server](https://discord.gg/ZVk7h9hCfw).
+[Apache 2.0](/LICENSE).
