@@ -6,6 +6,11 @@ Takes two raw GoPro Fusion frames (for front and back camera) and converts them 
 
 * the resulting image frames from fusion2sphere will not have any metadata. fusion2sphere is implemented in our GoPro Frame Maker script. [GoPro Frame Maker adds metadata once fusion2sphere has finished processing (and offers a few other features) which could be better suited to your requirements](https://github.com/trek-view/gopro-frame-maker/).
 * If you want to convert the dual Fusion videos from fisheyes to a single equirectangular video (not frames), [you can follow the steps in this blog post to do so](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-fusion-fisheye/). The `.pgm` files described later in this post are required for this.
+* Supporting blog posts that describe the fusion2sphere design decisions:
+	* [Part 1](https://www.trekview.org/blog/2021/gopro-fusion-fisheye-stitching-part-1/)
+	* [Part 2](https://www.trekview.org/blog/2021/gopro-fusion-fisheye-stitching-part-2/)
+	* [Part 3](https://www.trekview.org/blog/2021/gopro-fusion-fisheye-stitching-part-3/)
+	* [Part 4](https://www.trekview.org/blog/2022/gopro-fusion-fisheye-stitching-part-4/)
 * If you're using a GoPro Max, [check out max2sphere](https://github.com/trek-view/max2sphere).
 
 ## Installation
