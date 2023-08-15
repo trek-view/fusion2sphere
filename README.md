@@ -86,7 +86,7 @@ Options:
 * `-f` flag needs two images one from front and second from back.
 * `-o` flag outputs the final image.
 * `-d`: debug mode
-* `-r`: create remap filters for ffmpeg ([see this post for more on how these are used](https://www.trekview.org/blog/using-ffmpeg-process-gopro-fusion-max-360))
+* `-r`: create remap filters for ffmpeg ([see this post for more on how these are used](https://www.trekview.org/blog/2022/using-ffmpeg-process-gopro-fusion-fisheye/))
 
 #### Examples (MacOS)
 
